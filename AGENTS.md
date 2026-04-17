@@ -48,6 +48,11 @@ Or use shorthand triggers:
 ```text
 raw/                # Immutable source documents — never modify these
 
+raw-processed/      # Source-faithful, formatted derivatives of raw files
+  *.md              # Clean markdown/text versions with structure improved
+                    # Must preserve all information from raw as completely as possible
+                    # Examples: translated versions, PDF-to-markdown conversions, cleaned formatting
+
 wiki/               # Agent-owned modular knowledge layer
   index.md          # Catalog of all pages — update on every ingest
   log.md            # Append-only chronological record
@@ -77,6 +82,7 @@ tools/              # Custom scripts — agent-built as needed
 ### Layer Responsibilities
 
 * `raw/` is the immutable evidence base.
+* `raw-processed/` is the formatted, source-faithful preprocessing layer used before deeper wiki extraction.
 * `wiki/` is optimized for modularity, retrieval, and maintenance.
 * `structured/` is optimized for sequential reading, pedagogy, and full conceptual understanding.
 * `graph/` is optimized for visualizing relationships.
@@ -122,6 +128,34 @@ Optimize for the level of granularity that best supports explanation, navigation
 
 A good wiki is not the one with the most pages.
 A good wiki is the one that helps humans and agents understand the material correctly.
+
+---
+
+## Raw-Processed Layer Standard
+
+The `raw-processed/` folder exists to hold **partially processed but information-complete** versions of source material before deeper wiki extraction.
+
+This layer is for:
+
+* formatting messy text into clean Markdown
+* converting PDFs, DOCX, slides, or other formats into readable Markdown/text
+* translating content when needed
+* normalizing headings, lists, tables, and structure
+* preserving the full information content of the source while making it easier to parse and read
+
+### Raw-Processed Rules
+
+* Preserve the source content as completely as possible.
+* Do **not** summarize away details at this stage.
+* Do **not** drop sections just because they seem low priority.
+* Do **not** rewrite aggressively enough to lose meaning.
+* Prefer **structure-preserving conversion** over OCR.
+* OCR is **not** the default strategy.
+* If the source already contains extractable text, convert it directly into well-structured Markdown/text instead of using OCR.
+* If translation is performed, preserve meaning and informational completeness as closely as possible.
+* The `raw-processed/` layer is still not the final wiki layer; it is a faithful intermediate representation.
+
+The purpose of `raw-processed/` is to make raw material readable and machine-usable **without losing information**.
 
 ---
 
@@ -357,29 +391,36 @@ Triggered by: *"ingest <file>"*
 Steps (in order):
 
 1. Read the source document fully
-2. Read `wiki/index.md` and `wiki/overview.md` for current modular context
-3. Read `structured/god.md` and/or `structured/god.html` if they exist
-4. Write `wiki/sources/<slug>.md` — use the source page format below
-5. Update `wiki/index.md` — add entry under Sources
-6. Update `wiki/overview.md` — revise synthesis if warranted
-7. Identify candidate **entities**, **concepts**, and **formulas / notations** mentioned in the source
-8. Create or update entity pages only for items that meet the **Page Creation Rule**
-9. Create or update concept pages only for items that meet the **Page Creation Rule**
-10. Create or update formula pages only for items that meet the **Formula Creation Rule**
-11. Record peripheral, one-off, or low-value terms inline inside the relevant source page instead of forcing a standalone page for each mention
-12. Flag contradictions with existing wiki content
-13. Update the structured layer:
+2. Create or update a corresponding file in `raw-processed/`
+
+   * convert the source into clean, structured Markdown/text when needed
+   * preserve all information as completely as possible
+   * improve readability and structure without collapsing content into summary
+   * prefer direct extraction / conversion over OCR
+3. Read `wiki/index.md` and `wiki/overview.md` for current modular context
+4. Read `structured/god.md` and/or `structured/god.html` if they exist
+5. Write `wiki/sources/<slug>.md` — use the source page format below
+6. Update `wiki/index.md` — add entry under Sources
+7. Update `wiki/overview.md` — revise synthesis if warranted
+8. Identify candidate **entities**, **concepts**, and **formulas / notations** mentioned in the processed source
+9. Create or update entity pages only for items that meet the **Page Creation Rule**
+10. Create or update concept pages only for items that meet the **Page Creation Rule**
+11. Create or update formula pages only for items that meet the **Formula Creation Rule**
+12. Record peripheral, one-off, or low-value terms inline inside the relevant source page instead of forcing a standalone page for each mention
+13. Flag contradictions with existing wiki content
+14. Update the structured layer:
 
     * revise `structured/god.md`
     * revise `structured/god.html` if present or warranted
     * ensure the new information is integrated into the linear teaching narrative
-14. Update `structured/manifest.md`
-15. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Title>`
-16. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured integration | <Title>`
-17. **Post-ingest validation**
+15. Update `structured/manifest.md`
+16. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Title>`
+17. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured integration | <Title>`
+18. **Post-ingest validation**
 
     * check for broken `[[wikilinks]]`
     * verify all new pages are in `wiki/index.md`
+    * verify the processed source still preserves the original information
     * verify the structured layer still reads coherently from start to finish
     * verify important new insights are not trapped only inside fragmented wiki pages
     * print a change summary
@@ -388,10 +429,11 @@ Steps (in order):
 
 Every ingest must update both:
 
+* the **source-faithful preprocessing layer**
 * the **modular knowledge layer**
 * the **human mastery layer**
 
-Do not let the wiki become rich while the structured layer becomes stale.
+Do not let the raw material stay messy, the wiki become rich, and the structured layer become stale.
 
 ---
 
@@ -458,6 +500,7 @@ type: source
 tags: []
 date: YYYY-MM-DD
 source_file: raw/...
+processed_file: raw-processed/...
 last_updated: YYYY-MM-DD
 ---
 
@@ -674,6 +717,8 @@ title: "YYYY-MM-DD Diary"
 type: source
 tags: [diary]
 date: YYYY-MM-DD
+source_file: raw/...
+processed_file: raw-processed/...
 last_updated: YYYY-MM-DD
 ---
 
@@ -704,6 +749,8 @@ title: "Meeting Title"
 type: source
 tags: [meeting]
 date: YYYY-MM-DD
+source_file: raw/...
+processed_file: raw-processed/...
 last_updated: YYYY-MM-DD
 ---
 
@@ -747,7 +794,8 @@ Steps:
    * `wiki/concepts/`
    * `wiki/formulas/`
    * `wiki/syntheses/` if relevant
-4. Identify:
+4. Read the relevant files in `raw-processed/` when higher-fidelity wording or formatting context is needed
+5. Identify:
 
    * foundational concepts
    * dependency order between concepts
@@ -757,12 +805,12 @@ Steps:
    * tradeoffs
    * expert-level nuances
    * contradictions and unresolved tensions
-5. Build or rewrite `structured/god.md`
-6. Decide whether `structured/god.html` would materially improve understanding
-7. If yes, build or rewrite `structured/god.html`
-8. Update `structured/manifest.md`
-9. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured rebuild | god document`
-10. Validate:
+6. Build or rewrite `structured/god.md`
+7. Decide whether `structured/god.html` would materially improve understanding
+8. If yes, build or rewrite `structured/god.html`
+9. Update `structured/manifest.md`
+10. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured rebuild | god document`
+11. Validate:
 
 * a first-time reader can follow it without using the rest of the repo
 * terms are introduced before heavy use
@@ -835,19 +883,21 @@ Steps:
 3. Read `structured/god.html` if it contains richer explanatory material relevant to the question
 4. Read the relevant modular wiki pages for precision and traceability
 5. Read formula pages when the question involves equations, notation, metrics, symbolic definitions, or formal reasoning
-6. Synthesize an answer with inline citations as `[[PageName]]` wikilinks
-7. If useful, answer in layers:
+6. Read the corresponding `raw-processed/` file when precise wording, formatting, full detail, or translation context matters
+7. Synthesize an answer with inline citations as `[[PageName]]` wikilinks
+8. If useful, answer in layers:
 
    * **Direct answer**
    * **Deep explanation**
    * **Formula / notation explanation** if relevant
-8. Ask the user if they want the answer filed as `wiki/syntheses/<slug>.md`
+9. Ask the user if they want the answer filed as `wiki/syntheses/<slug>.md`
 
 ### Query Routing Rule
 
 * Use `structured/` first for understanding
 * Use `wiki/` first for retrieval
 * Use `wiki/formulas/` when formalism matters
+* Use `raw-processed/` when source-faithful wording or formatting matters
 * Use all relevant layers when the user needs both explanation and evidence
 
 ---
@@ -864,6 +914,8 @@ Check for:
 * **Broken links** — `[[WikiLinks]]` pointing to missing pages
 * **Contradictions** — claims that conflict across pages
 * **Stale summaries** — pages not updated after newer sources
+* **Missing processed sources** — raw files that do not yet have a corresponding `raw-processed/` version
+* **Processed/raw drift** — processed files that appear to have lost structure or information from the raw source
 * **Missing high-value pages** — entities, concepts, or formulas that clearly meet the Page Creation Rule or Formula Creation Rule but do not yet have their own pages
 * **Over-fragmentation** — pages that exist but are too trivial, too isolated, or too low-value to justify standalone existence
 * **Data gaps** — questions the wiki cannot answer; suggest new sources
@@ -939,6 +991,7 @@ Use `verb-object.py` naming:
 * `validate-links.py`
 * `extract-formulas.py`
 * `generate-dataset.py`
+* `process-raw.py`
 
 ### Tool Construction Standards
 
@@ -984,6 +1037,7 @@ Or if the user triggers `build graph` or similar workflow triggers, the agent wi
 ## Naming Conventions
 
 * Source slugs: `kebab-case` matching source filename
+* Processed source files: use the same slug as the raw source when possible
 * Entity pages: `TitleCase.md` (e.g. `OpenAI.md`, `SamAltman.md`)
 * Concept pages: `TitleCase.md` (e.g. `ReinforcementLearning.md`, `RAG.md`)
 * Formula pages: `TitleCase.md` when the formula has a canonical name (e.g. `BayesRule.md`, `CrossEntropyLoss.md`, `BellmanEquation.md`)
@@ -1107,6 +1161,8 @@ Do not confuse:
 
 The repository is not truly complete until the structured layer contains a strong canonical god document — in Markdown, HTML, or both — that lets a serious human reader consume it in one session and emerge with deep, connected, expert-level understanding of the topic.
 
+The raw layer exists as evidence.
+The raw-processed layer exists to preserve that evidence in clean, usable form.
 The modular layer exists to support navigation, retrieval, and maintenance.
 The structured layer exists to produce mastery.
 Formulas and notation are not optional details when they are part of real understanding.
