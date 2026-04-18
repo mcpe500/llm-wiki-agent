@@ -142,6 +142,27 @@ Optimize for the level of granularity that best supports explanation, navigation
 A good wiki is not the one with the most pages.
 A good wiki is the one that helps humans and agents understand the material correctly.
 
+### Depth-First Rule
+
+Depth is mandatory for high-value pages.
+
+If a page covers a central algorithm, dataset, entity, concept, formula, institution, country, person, or historical event, the page must not stop at a short definition plus a few bullets.
+
+For high-value pages, the agent must explain:
+
+* what it is
+* where it came from
+* why it matters
+* what problem it solves
+* how it works internally
+* which formulas, symbols, parameters, or structures are central
+* what assumptions and constraints apply
+* what important examples anchor understanding
+* how it relates to other pages in the repository
+
+The repository should prefer fewer deep, query-worthy pages over many shallow stubs.
+If a page remains too short to teach the topic, it is incomplete even if the formatting is correct.
+
 ---
 
 ## Raw-Processed Layer Standard
@@ -454,22 +475,24 @@ Steps (in order):
 10. Create or update entity pages only for items that meet the **Page Creation Rule**
 11. Create or update concept pages only for items that meet the **Page Creation Rule**
 12. Create or update formula pages only for items that meet the **Formula Creation Rule**
-13. Record peripheral, one-off, or low-value terms inline inside the relevant source page instead of forcing a standalone page for each mention
-14. Flag contradictions with existing wiki content
-15. Update the structured layer:
+13. Expand high-value entity, concept, and formula pages to a teaching depth that supports real understanding rather than leaving them as short stubs
+14. Record peripheral, one-off, or low-value terms inline inside the relevant source page instead of forcing a standalone page for each mention
+15. Flag contradictions with existing wiki content
+16. If the source is a discussion entry that changes repository understanding, integrate its conclusions into the modular wiki rather than leaving them trapped in `discussion/`
+17. Update the structured layer:
 
     * revise `structured/god.md`
     * revise `structured/god.html` if present or warranted
     * ensure the new information is integrated into the linear teaching narrative
-16. Update the UI layer:
+18. Update the UI layer:
 
     * revise `ui/index.html`
     * add or update any HTML page whose purpose is discovery, navigation, or visualization of the new material
     * ensure new high-value content is reachable from the browser surface
-17. Update `structured/manifest.md`
-18. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Title>`
-19. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured integration | <Title>`
-20. **Post-ingest validation**
+19. Update `structured/manifest.md`
+20. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Title>`
+21. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured integration | <Title>`
+22. **Post-ingest validation**
 
     * check for broken `[[wikilinks]]`
     * verify all new pages are in `wiki/index.md`
@@ -504,6 +527,8 @@ Create or update an entity or concept page when at least one of the following is
 * it connects multiple pages or themes together
 * it is ambiguous enough that a dedicated definition would reduce confusion
 * it materially improves the quality of `structured/god.md` or `structured/god.html`
+* it is a dataset case, algorithm, optimizer, Hamiltonian component, visualization model, or baseline comparator that the repository relies on repeatedly
+* it is currently causing broken wikilinks, weak explanations, or repeated inline re-explanations that indicate a missing canonical page
 
 Do **not** create standalone pages for items that are merely incidental, fleeting, obvious from context, or too narrow to justify independent navigation value.
 
@@ -514,6 +539,22 @@ When in doubt, prefer:
 
 The goal is not maximum page count.
 The goal is maximum clarity, retrievability, and teaching value.
+
+### High-Value Page Rule
+
+If a page is created for a high-value item, depth is mandatory.
+
+High-value items include:
+
+* core algorithms
+* important datasets and dataset cases
+* baseline classical comparators
+* mathematical operators such as Hamiltonians, objectives, constraints, or mappings
+* historically or scientifically important entities
+* concepts that are prerequisites for multiple other pages
+
+For these pages, a one-paragraph stub is a failure.
+The page must teach the reader enough that the term does not remain a black box.
 
 ---
 
@@ -530,6 +571,7 @@ Create or update a formula page when at least one of the following is true:
 * the notation is dense enough that it deserves its own explanation
 * the formula materially improves the quality of `structured/god.md` or `structured/god.html`
 * the formula is needed to bridge surface understanding and deep understanding
+* the formula is necessary to explain a hybrid workflow, preprocessing pipeline, simulator metric, Hamiltonian mapping, or baseline comparison used in the repository
 
 If a formula is minor, trivial, or only mentioned in passing, explain it inline in the relevant source page instead of forcing a standalone formula page.
 
@@ -543,6 +585,15 @@ Granularity matters:
 Do not ignore formulas just because they are “small.”
 Do not force a page for every symbol either.
 Optimize for understanding.
+
+For important formulas, explain:
+
+* what the expression computes or states
+* where it comes from
+* what each symbol means
+* why the structure has that form
+* how it is used in the repository
+* what common misunderstandings or edge cases exist
 
 ---
 
@@ -605,6 +656,15 @@ Entities may include:
 
 Create entity pages selectively using the **Page Creation Rule**.
 
+The template below is a minimum.
+For high-value entities, especially algorithms, datasets, institutions, countries, people, and historically important systems, extend it until the page is genuinely explanatory.
+
+Entity-specific expectations:
+
+* **Algorithm / method entities** should usually explain background, problem statement, workflow, parameters, formulas, complexity, use cases, and limitations.
+* **Dataset / case entities** should usually explain structure, field meaning, preprocessing needs, experiment role, and interpretation.
+* **Person / organization / country entities** should usually explain identity, historical context, major milestones, role in the topic, and the facts a reader would need to understand later references.
+
 ```markdown
 ---
 title: "Entity Name"
@@ -617,6 +677,9 @@ last_updated: YYYY-MM-DD
 ## Definition
 What this entity is.
 
+## Background / Context
+Where this entity came from, when it emerged, and why it matters.
+
 ## Role in the Repository
 Why this entity matters here.
 
@@ -624,13 +687,23 @@ Why this entity matters here.
 - Characteristic 1
 - Characteristic 2
 
+## Internal Structure / Mechanics
+How it works, how it is organized, or what its major parts are.
+Use this section whenever the entity is more than a named label.
+
+## Formalism / Data / Parameters
+Important symbols, data fields, formulas, parameters, or measurable properties associated with the entity.
+
+## Examples / Cases
+Concrete examples, representative use cases, or historically important instances.
+
 ## Relationships
 - [[ConceptName]] — how it connects
 - [[FormulaName]] — formalism or rule associated with it
 - [[OtherEntity]] — how it relates
 
-## Notes
-Important context, caveats, or changes over time.
+## Notes / Caveats
+Important context, caveats, assumptions, edge cases, or changes over time.
 ```
 
 ### Concept Page Format
@@ -660,6 +733,9 @@ They exist to improve understanding, navigation, synthesis, and reuse — not to
 
 Each concept page should contain the sections that are actually useful for that concept.
 Use the following template flexibly rather than mechanically.
+High-value concepts should nearly always include background, formal structure, mechanics, examples, and caveats.
+
+If a concept is central to the repository, the page should be rich enough that a reader can understand the concept without immediately needing to open three more pages.
 
 ```markdown
 ---
@@ -673,12 +749,19 @@ last_updated: YYYY-MM-DD
 ## Definition
 Clear explanation of what the concept is.
 
+## Background / Origin
+Where the concept came from, what problem motivated it, or how it entered the literature.
+
 ## Why It Matters
 Why this concept is important in the context of this repository.
 
 ## Structure / Mechanics
 How the concept works, how it is organized, or what its internal logic is.
 Use this section only when it adds value.
+
+## Formalism / Notation
+Important formulas, symbols, variables, or data structures associated with the concept.
+If notation matters, explain the symbols instead of merely stating the formula.
 
 ## Variants / Interpretations
 Alternative forms, schools of thought, implementations, or meanings, if relevant.
@@ -693,6 +776,9 @@ Concrete examples showing the concept in practice.
 
 ## Notes / Caveats
 Assumptions, limitations, edge cases, or common confusions.
+
+## Common Misunderstandings
+What readers often get wrong about the concept and how to correct it.
 ```
 
 ### Formula Page Format
@@ -1207,6 +1293,10 @@ Steps:
 4. Record the key points, decisions, and reasoning from the discussion
 5. Update `discussion/index.md` — add entry under Discussions
 6. Link relevant wiki pages using `[[PageName]]` wikilinks
+7. If the discussion resolves a modeling, dataset, preprocessing, visualization, methodological, or interpretation issue, treat it as ingest-worthy knowledge and integrate it into the wiki and structured layer rather than leaving it as an isolated note
+
+Discussion entries should be especially detailed when they resolve repository confusion.
+For design-critical topics, prefer a single deep discussion over many tiny fragments.
 
 ### Discussion Entry Format
 
@@ -1234,6 +1324,16 @@ What prompted this discussion.
 ## Connections
 - [[WikiPageName]] — relevant connection
 ```
+
+For high-signal discussions, add sections such as:
+
+* `## Problem Analysis`
+* `## Decisions Made`
+* `## Modeling Implications`
+* `## Impact on Wiki / Structured / UI`
+* `## Next Actions`
+
+when these sections materially improve the usefulness of the discussion as a future source.
 
 ### Discussion Index Format
 
