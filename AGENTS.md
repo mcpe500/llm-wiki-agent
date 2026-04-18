@@ -2,10 +2,11 @@
 
 This repository is maintained entirely by your coding agent. No API key or Python scripts are required for normal operation — just open this repo in Codex, OpenCode, or any agent that reads this file, and talk to it.
 
-This repo has **two complementary knowledge layers**:
+This repo has **two complementary knowledge layers and one presentation layer**:
 
 1. **`wiki/`** — modular, linked, incremental knowledge for retrieval, maintenance, and traceability.
 2. **`structured/`** — human-first, linear, deeply explanatory knowledge meant to be consumed in one sitting.
+3. **`ui/`** — browser-first HTML surface for reading, navigation, dashboards, and visualizations across the repo.
 
 The purpose of `structured/` is explicit and non-optional:
 
@@ -36,6 +37,9 @@ Or use shorthand triggers:
 - `query: <question>` → runs the Query Workflow
 - `lint` → runs the Lint Workflow
 - `build graph` → runs the Graph Workflow
+- `build ui` → runs the UI Workflow
+- `rebuild ui` → runs the UI Workflow
+- `open ui` → updates the browser surface if needed and uses `ui/index.html` as the primary entrypoint
 - `build structured` → runs the Structured Workflow
 - `rebuild god document` → runs the Structured Workflow
 - `god mode` → rebuilds the structured master document
@@ -73,11 +77,19 @@ structured/         # Human-readable long-form mastery layer
   manifest.md       # What the structured layer covers, gaps, and rebuild priorities
   changelog.md      # Append-only record of major structured revisions
 
-graph/              # Auto-generated graph data
+ui/                 # Browser-first presentation layer
+  index.html        # Required main entrypoint for reading and navigating the repo
+  assets/           # CSS, JS, fonts, images, and reusable UI assets
+  pages/            # Optional generated HTML pages for sources, concepts, entities, formulas, graph views, etc.
+  data/             # Optional derived JSON or other UI-facing data files
+
+graph/              # Auto-generated graph data and visualization inputs
 tools/              # Custom scripts — agent-built as needed
   README.md         # Tool inventory and usage guide
   *.py              # Individual tools (naming: verb-object.py)
 ````
+
+Beyond the required `ui/index.html`, the internal UI folder structure is flexible. The agent may add, rename, or reorganize UI subfolders when it improves clarity.
 
 ### Layer Responsibilities
 
@@ -85,7 +97,8 @@ tools/              # Custom scripts — agent-built as needed
 * `raw-processed/` is the formatted, source-faithful preprocessing layer used before deeper wiki extraction.
 * `wiki/` is optimized for modularity, retrieval, and maintenance.
 * `structured/` is optimized for sequential reading, pedagogy, and full conceptual understanding.
-* `graph/` is optimized for visualizing relationships.
+* `ui/` is optimized for browser-based reading, navigation, and HTML-first presentation across the repository.
+* `graph/` is optimized for relationship data and graph-specific generation inputs.
 * `tools/` is optimized for automation, conversion, generation, and any ad-hoc scripting needs that arise during the agent's work.
 
 The agent must keep these layers aligned.
@@ -214,6 +227,7 @@ The canonical structured deliverable is:
   * side-by-side comparisons
   * layered pedagogy
   * richer interactive or visual teaching structure
+* Any artifact whose primary value is visualization, navigation, or interactive inspection should be delivered as HTML inside `ui/`, not as Markdown-only output.
 
 If both exist, they must represent the same conceptual canon.
 
@@ -224,6 +238,38 @@ It must **teach the topic**.
 
 Its job is not to sound knowledgeable.
 Its job is to make the human reader actually understand.
+
+---
+
+## UI Layer Standard
+
+The `ui/` folder exists for **browser-first access** to the repository.
+
+Its purpose is to let a human open one entrypoint and navigate the most important knowledge artifacts without manually jumping between directories.
+
+### Canonical UI Entry Point
+
+The canonical browser entrypoint is:
+
+1. `ui/index.html` — required HTML landing page for the repository
+
+### UI Responsibilities
+
+The UI layer should:
+
+* expose the main reading paths through the repo
+* link to or embed the current structured master document
+* surface graph and other visual outputs
+* make high-value sources, concepts, entities, formulas, and syntheses discoverable
+* prefer HTML for anything that is primarily visual, navigational, comparative, or dashboard-like
+
+### UI Rules
+
+* `ui/index.html` is required.
+* `ui/index.html` should make it easy to reach `structured/god.md`, `structured/god.html` if present, graph views, and other high-value HTML pages.
+* If an output is mainly a visualization, explorer, comparison table, map, timeline, dashboard, or navigation surface, build it as HTML in `ui/`.
+* Markdown remains acceptable for canonical text-heavy knowledge artifacts, but it is not the preferred format for visual presentation.
+* The UI layer must stay synchronized with `wiki/`, `structured/`, and `graph/`.
 
 ---
 
@@ -381,6 +427,7 @@ If `god.html` exists, it must remain:
 * faithful to source-grounded claims
 * pedagogically superior where visuals matter
 * synchronized in substance with `god.md`
+* reachable from `ui/index.html`
 
 ---
 
@@ -399,41 +446,49 @@ Steps (in order):
    * prefer direct extraction / conversion over OCR
 3. Read `wiki/index.md` and `wiki/overview.md` for current modular context
 4. Read `structured/god.md` and/or `structured/god.html` if they exist
-5. Write `wiki/sources/<slug>.md` — use the source page format below
-6. Update `wiki/index.md` — add entry under Sources
-7. Update `wiki/overview.md` — revise synthesis if warranted
-8. Identify candidate **entities**, **concepts**, and **formulas / notations** mentioned in the processed source
-9. Create or update entity pages only for items that meet the **Page Creation Rule**
-10. Create or update concept pages only for items that meet the **Page Creation Rule**
-11. Create or update formula pages only for items that meet the **Formula Creation Rule**
-12. Record peripheral, one-off, or low-value terms inline inside the relevant source page instead of forcing a standalone page for each mention
-13. Flag contradictions with existing wiki content
-14. Update the structured layer:
+5. Read `ui/index.html` if it exists so the browser surface can stay aligned
+6. Write `wiki/sources/<slug>.md` — use the source page format below
+7. Update `wiki/index.md` — add entry under Sources
+8. Update `wiki/overview.md` — revise synthesis if warranted
+9. Identify candidate **entities**, **concepts**, and **formulas / notations** mentioned in the processed source
+10. Create or update entity pages only for items that meet the **Page Creation Rule**
+11. Create or update concept pages only for items that meet the **Page Creation Rule**
+12. Create or update formula pages only for items that meet the **Formula Creation Rule**
+13. Record peripheral, one-off, or low-value terms inline inside the relevant source page instead of forcing a standalone page for each mention
+14. Flag contradictions with existing wiki content
+15. Update the structured layer:
 
     * revise `structured/god.md`
     * revise `structured/god.html` if present or warranted
     * ensure the new information is integrated into the linear teaching narrative
-15. Update `structured/manifest.md`
-16. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Title>`
-17. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured integration | <Title>`
-18. **Post-ingest validation**
+16. Update the UI layer:
+
+    * revise `ui/index.html`
+    * add or update any HTML page whose purpose is discovery, navigation, or visualization of the new material
+    * ensure new high-value content is reachable from the browser surface
+17. Update `structured/manifest.md`
+18. Append to `wiki/log.md`: `## [YYYY-MM-DD] ingest | <Title>`
+19. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured integration | <Title>`
+20. **Post-ingest validation**
 
     * check for broken `[[wikilinks]]`
     * verify all new pages are in `wiki/index.md`
     * verify the processed source still preserves the original information
     * verify the structured layer still reads coherently from start to finish
+    * verify `ui/index.html` still provides a coherent path into the updated material
     * verify important new insights are not trapped only inside fragmented wiki pages
     * print a change summary
 
 ### Ingest Priority Rule
 
-Every ingest must update both:
+Every ingest must update all of:
 
 * the **source-faithful preprocessing layer**
 * the **modular knowledge layer**
 * the **human mastery layer**
+* the **browser presentation layer**
 
-Do not let the raw material stay messy, the wiki become rich, and the structured layer become stale.
+Do not let the raw material stay messy, the wiki become rich, the structured layer become stale, or the UI layer become a dead shell.
 
 ---
 
