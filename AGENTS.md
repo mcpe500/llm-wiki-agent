@@ -863,9 +863,10 @@ Steps:
 6. Build or rewrite `structured/god.md`
 7. Decide whether `structured/god.html` would materially improve understanding
 8. If yes, build or rewrite `structured/god.html`
-9. Update `structured/manifest.md`
-10. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured rebuild | god document`
-11. Validate:
+9. Update or rebuild `ui/index.html` so the current structured outputs are discoverable from the browser surface
+10. Update `structured/manifest.md`
+11. Append to `structured/changelog.md`: `## [YYYY-MM-DD] structured rebuild | god document`
+12. Validate:
 
 * a first-time reader can follow it without using the rest of the repo
 * terms are introduced before heavy use
@@ -874,12 +875,14 @@ Steps:
 * the document explains, not merely summarizes
 * tradeoffs and contradictions are surfaced
 * the result is deep, not merely long
+* `ui/index.html` points clearly to the best current reading path
 
 ### Structured Manifest Requirements
 
 `structured/manifest.md` should track:
 
 * which canonical files exist (`god.md`, `god.html`)
+* whether `ui/index.html` exists and what it currently exposes
 * current coverage level
 * which sections are strong
 * which sections are thin
@@ -896,6 +899,7 @@ Suggested structure:
 ## Canonical Outputs
 - [god.md](god.md) — canonical long-form structured explanation
 - [god.html](god.html) — optional rich visual structured explanation
+- [../ui/index.html](../ui/index.html) — browser-first entrypoint into the repository
 
 ## Coverage Status
 - Foundations: draft | partial | substantial | comprehensive
@@ -921,9 +925,53 @@ Suggested structure:
 - Why `god.html` exists or does not exist
 - What pedagogical value HTML adds beyond Markdown
 
+## UI Status
+- Whether `ui/index.html` is current
+- Which structured and visualization pages are linked from the UI
+- Any known gaps between the browser surface and the canonical knowledge layers
+
 ## Next Best Sources To Ingest
 - raw/... because ...
 ```
+
+---
+
+## UI Workflow
+
+Triggered by:
+
+* *"build ui"*
+* *"rebuild ui"*
+* *"open ui"*
+
+Purpose:
+Create or refresh the browser-first HTML surface so a human can navigate the repository from `ui/index.html`.
+
+Steps:
+
+1. Read `wiki/index.md`
+2. Read `wiki/overview.md`
+3. Read `structured/god.md` and `structured/god.html` if present
+4. Read existing `ui/index.html` and any linked UI pages if they exist
+5. Decide the best browser information architecture for the current repository state
+6. Build or update `ui/index.html`
+7. Build or update any supporting HTML pages in `ui/` needed for:
+
+   * structured reading
+   * graph access
+   * source browsing
+   * entity / concept / formula discovery
+   * side-by-side comparisons or other high-value visual explanations
+8. Ensure the UI links only to outputs that actually exist
+9. Validate that a user can begin at `ui/index.html` and reach the highest-value materials quickly
+10. Report what the UI now exposes and what is still missing
+
+### UI Workflow Rule
+
+The UI layer is a presentation surface, not a replacement for canonical knowledge storage.
+
+`wiki/`, `structured/`, and `graph/` remain the authoritative content layers.
+`ui/` is the browser layer that makes them readable and navigable.
 
 ---
 
@@ -988,6 +1036,14 @@ Check for:
 * **False completeness** — the master document sounds complete while omitting known disputes
 * **HTML/Markdown drift** — `god.md` and `god.html` disagree in substance
 
+### UI Layer
+
+* **Broken UI navigation** — `ui/index.html` or linked UI pages point to missing files
+* **UI/source drift** — the UI omits or misrepresents important current structured or wiki outputs
+* **Stale browser surface** — recent high-value content exists but is not reachable from `ui/index.html`
+* **Visualization format drift** — a visual artifact was produced as Markdown when it should be HTML in `ui/`
+* **HTML consistency issues** — key HTML pages disagree in substance with canonical source-grounded pages
+
 Output a lint report and ask if the user wants it saved to:
 
 * `wiki/lint-report.md`
@@ -1008,7 +1064,11 @@ If Python/deps are unavailable, build manually:
 2. Build nodes (one per page) and edges (one per link)
 3. Infer implicit relationships not captured by wikilinks — tag `INFERRED` with confidence score; low confidence → `AMBIGUOUS`
 4. Write `graph/graph.json` with `{nodes, edges, built: date}`
-5. Write `graph/graph.html` as a self-contained visualization
+5. Write an HTML graph view in `ui/` such as `ui/graph.html`
+6. Ensure `ui/index.html` links to the graph view
+
+`graph/` should hold graph data and generation outputs.
+`ui/` should hold the human-facing HTML surface for graph exploration.
 
 ### Graph Note
 
